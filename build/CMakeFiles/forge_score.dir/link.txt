@@ -1,0 +1,1 @@
+/usr/bin/cc -O2 -Wl,--dependency-file=CMakeFiles/forge_score.dir/link.d CMakeFiles/forge_score.dir/tests/score.c.o -o forge_score  libforge_core.a

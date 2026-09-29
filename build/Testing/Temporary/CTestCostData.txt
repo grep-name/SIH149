@@ -1,0 +1,7 @@
+selftest 2 0.00279819
+build_image 2 0.0420528
+clean_audit 2 0.00379654
+recover_image 2 0.16079
+score_recovery 2 0.0014968
+verify_audit 2 0.000504813
+---

@@ -1,0 +1,12 @@
+/home/og/projects/SIH149/build/CMakeFiles/bin2c.dir
+/home/og/projects/SIH149/build/CMakeFiles/forge_core.dir
+/home/og/projects/SIH149/build/CMakeFiles/forge.dir
+/home/og/projects/SIH149/build/CMakeFiles/forge_mkimage.dir
+/home/og/projects/SIH149/build/CMakeFiles/forge_score.dir
+/home/og/projects/SIH149/build/CMakeFiles/test.dir
+/home/og/projects/SIH149/build/CMakeFiles/edit_cache.dir
+/home/og/projects/SIH149/build/CMakeFiles/rebuild_cache.dir
+/home/og/projects/SIH149/build/CMakeFiles/list_install_components.dir
+/home/og/projects/SIH149/build/CMakeFiles/install.dir
+/home/og/projects/SIH149/build/CMakeFiles/install/local.dir
+/home/og/projects/SIH149/build/CMakeFiles/install/strip.dir

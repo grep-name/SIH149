@@ -1,0 +1,1 @@
+/usr/bin/cc -O2 -Wl,--dependency-file=CMakeFiles/forge_mkimage.dir/link.d CMakeFiles/forge_mkimage.dir/tests/mkimage.c.o -o forge_mkimage  libforge_core.a

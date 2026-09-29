@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FORGE Console</title>
+<style>
+:root{
+  --bg:#f4f6f8; --panel:#ffffff; --ink:#151922; --muted:#616b7a; --line:#e0e4ea;
+  --accent:#1d4ed8; --accent-ink:#fff; --ok:#15803d; --bad:#b3261e; --warn:#a16207;
+  --chip:#eef2f7; --shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.1);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#0c0e13; --panel:#151920; --ink:#e7eaee; --muted:#98a2b3; --line:#252b35;
+    --accent:#60a5fa; --accent-ink:#0c0e13; --ok:#4ade80; --bad:#f87171; --warn:#fbbf24;
+    --chip:#1d232c; --shadow:none;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:14px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
+.mono{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+header{background:var(--panel);border-bottom:1px solid var(--line);padding:14px 22px;
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;position:sticky;top:0;z-index:10}
+.brand{font-weight:700;letter-spacing:.14em;font-size:15px}
+.brand small{display:block;font-weight:400;letter-spacing:0;font-size:11px;color:var(--muted)}
+.sysinfo{margin-left:auto;font-size:12px;color:var(--muted);text-align:right;line-height:1.4}
+nav{display:flex;gap:2px;padding:0 22px;background:var(--panel);border-bottom:1px solid var(--line);
+  overflow-x:auto}
+nav button{background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);
+  padding:11px 16px;font:inherit;font-weight:500;cursor:pointer;white-space:nowrap}
+nav button[aria-selected=true]{color:var(--accent);border-bottom-color:var(--accent)}
+main{max-width:1280px;margin:0 auto;padding:22px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  padding:18px;margin-bottom:16px;box-shadow:var(--shadow)}
+h2{font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin:0 0 12px}
+h3{font-size:14px;margin:0 0 8px}
+.grid{display:grid;gap:14px}
+@media(min-width:900px){.grid.two{grid-template-columns:1fr 1fr}}
+label{display:block;font-size:12px;color:var(--muted);margin:0 0 4px}
+input,select,textarea{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;
+  background:var(--bg);color:var(--ink);font:inherit}
+input[type=checkbox]{width:auto;margin-right:7px;vertical-align:-1px}
+.field{margin-bottom:12px}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.row>*{flex:1 1 180px}
+button.act{background:var(--accent);color:var(--accent-ink);border:0;border-radius:8px;
+  padding:9px 18px;font:inherit;font-weight:600;cursor:pointer}
+button.act:disabled{opacity:.45;cursor:not-allowed}
+button.ghost{background:var(--chip);color:var(--ink);border:1px solid var(--line);
+  border-radius:8px;padding:7px 14px;font:inherit;cursor:pointer}
+button.danger{background:var(--bad);color:#fff}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+tr.sel{background:color-mix(in srgb,var(--accent) 12%,transparent)}
+tbody tr{cursor:pointer}
+.badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600}
+.b-ok{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}
+.b-bad{background:color-mix(in srgb,var(--bad) 16%,transparent);color:var(--bad)}
+.b-warn{background:color-mix(in srgb,var(--warn) 20%,transparent);color:var(--warn)}
+.b-info{background:var(--chip);color:var(--muted)}
+.bar{height:7px;border-radius:4px;background:var(--chip);overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--accent);transition:width .3s}
+.note{font-size:12px;color:var(--muted);margin-top:8px}
+.alert{border-left:3px solid var(--warn);background:color-mix(in srgb,var(--warn) 9%,transparent);
+  padding:10px 14px;border-radius:0 8px 8px 0;font-size:13px;margin-bottom:14px}
+.alert.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 9%,transparent)}
+.empty{color:var(--muted);font-size:13px;padding:18px;text-align:center}
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
+.kpi div{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px}
+.kpi b{display:block;font-size:19px;font-weight:650}
+.kpi span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+code{background:var(--chip);padding:1px 5px;border-radius:4px;font-size:12px}
+.hide{display:none}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">FORGE<small>Secure Erasure &amp; Forensic Recovery</small></div>
+  <div class="sysinfo" id="sysinfo">connecting&hellip;</div>
+</header>
+
+<nav id="tabs">
+  <button data-tab="drive" aria-selected="true">Drive Eraser</button>
+  <button data-tab="files" aria-selected="false">File &amp; Folder Eraser</button>
+  <button data-tab="recover" aria-selected="false">Recovery &amp; Carving</button>
+  <button data-tab="jobs" aria-selected="false">Jobs &amp; Reports</button>
+  <button data-tab="audit" aria-selected="false">Audit</button>
+</nav>
+
+<main>
+<div id="privwarn" class="alert bad hide">
+  Not running elevated. Raw device access will be refused &mdash; restart as Administrator (Windows) or with <code>sudo</code> (Linux/macOS).
+</div>
+
+<!-- ==================== DRIVE ==================== -->
+<section id="tab-drive">
+  <div class="panel">
+    <h2>Attached storage devices</h2>
+    <table id="devtable"><thead><tr>
+      <th>Device</th><th>Model</th><th>Serial</th><th>Capacity</th><th>Type</th>
+      <th>Mounted</th><th>Firmware sanitize</th>
+    </tr></thead><tbody><tr><td colspan="7" class="empty">loading&hellip;</td></tr></tbody></table>
+    <div class="note">Click a row to select it. Devices holding the running operating system are refused unless the override is ticked.</div>
+  </div>
+
+  <div class="panel">
+    <h2>Sanitization</h2>
+    <div class="grid two">
+      <div>
+        <div class="field"><label for="d-device">Target device</label>
+          <input id="d-device" class="mono" placeholder="select a device above, or type a path / image file"></div>
+        <div class="field"><label for="d-method">Method</label><select id="d-method"></select></div>
+        <div id="d-standard" class="note"></div>
+      </div>
+      <div>
+        <div class="field"><label for="d-verify">Verification</label><select id="d-verify">
+          <option value="sample">Statistical sample (fast, 4096 probes)</option>
+          <option value="full">Full read-back of every sector</option>
+          <option value="none">None</option>
+        </select></div>
+        <div class="row">
+          <div class="field"><label for="d-case">Case ID</label><input id="d-case"></div>
+          <div class="field"><label for="d-op">Operator</label><input id="d-op"></div>
+        </div>
+        <div class="field"><label for="d-confirm">Confirmation &mdash; type the device serial number, or the word ERASE</label>
+          <input id="d-confirm" class="mono" placeholder="ERASE"></div>
+      </div>
+    </div>
+    <div class="row" style="margin-bottom:12px">
+      <label><input type="checkbox" id="d-fw" checked> Use firmware sanitize when available</label>
+      <label><input type="checkbox" id="d-trim" checked> Issue TRIM afterwards</label>
+      <label><input type="checkbox" id="d-dry"> Dry run</label>
+      <label><input type="checkbox" id="d-sys"> Allow system / mounted disk</label>
+    </div>
+    <button class="act danger" id="d-go">Start sanitization</button>
+    <div class="note">This is irreversible. On SSDs a firmware Purge is preferred; host-level overwrite cannot reach over-provisioned or retired blocks.</div>
+  </div>
+</section>
+
+<!-- ==================== FILES ==================== -->
+<section id="tab-files" class="hide">
+  <div class="panel">
+    <h2>Secure file &amp; folder erasure</h2>
+    <div class="grid two">
+      <div>
+        <div class="field"><label for="f-paths">Paths, one per line</label>
+          <textarea id="f-paths" rows="6" class="mono" placeholder="C:\Cases\2026-114\exports&#10;C:\Users\me\Desktop\draft.docx"></textarea></div>
+        <div class="row">
+          <div class="field"><label for="f-include">Include glob</label><input id="f-include" placeholder="*.docx,*.pdf"></div>
+          <div class="field"><label for="f-exclude">Exclude glob</label><input id="f-exclude" placeholder="*.log"></div>
+        </div>
+      </div>
+      <div>
+        <div class="field"><label for="f-method">Method</label><select id="f-method"></select></div>
+        <div class="field"><label for="f-verify">Verification</label><select id="f-verify">
+          <option value="sample">Sampled read-back</option>
+          <option value="full">Full read-back</option>
+          <option value="none">None</option>
+        </select></div>
+        <div class="row">
+          <div class="field"><label for="f-case">Case ID</label><input id="f-case"></div>
+          <div class="field"><label for="f-op">Operator</label><input id="f-op"></div>
+        </div>
+        <label><input type="checkbox" id="f-rec" checked> Recurse into subfolders</label>
+        <label><input type="checkbox" id="f-meta" checked> Scrub metadata (names, timestamps, ADS, xattrs)</label>
+        <label><input type="checkbox" id="f-slack" checked> Wipe cluster slack</label>
+        <label><input type="checkbox" id="f-rmdir"> Remove emptied directories</label>
+        <label><input type="checkbox" id="f-dry"> Dry run</label>
+      </div>
+    </div>
+    <button class="act danger" id="f-go" style="margin-top:6px">Erase selected paths</button>
+  </div>
+
+  <div class="panel">
+    <h2>Free-space wipe</h2>
+    <div class="row">
+      <div class="field"><label for="w-vol">Volume</label><input id="w-vol" class="mono" placeholder="C:\ or /home"></div>
+      <div class="field"><label for="w-method">Pattern</label><select id="w-method"></select></div>
+      <div class="field" style="align-self:end"><button class="act" id="w-go">Wipe free space</button></div>
+    </div>
+    <div class="note">Fills every unallocated cluster, then releases it &mdash; this is what destroys the content of files deleted before FORGE was installed. Directory-entry and MFT record padding is included.</div>
+  </div>
+</section>
+
+<!-- ==================== RECOVER ==================== -->
+<section id="tab-recover" class="hide">
+  <div class="panel">
+    <h2>Forensic recovery</h2>
+    <div class="grid two">
+      <div>
+        <div class="field"><label for="r-src">Evidence source (device or image file)</label>
+          <input id="r-src" class="mono" placeholder="\\.\PhysicalDrive2  or  /dev/sdb  or  case114.dd"></div>
+        <div class="field"><label for="r-out">Output directory for recovered files</label>
+          <input id="r-out" class="mono" placeholder="C:\Cases\2026-114\recovered"></div>
+        <div class="row">
+          <div class="field"><label for="r-types">File types (blank = all)</label><input id="r-types" placeholder="jpg,pdf,docx,sqlite"></div>
+          <div class="field"><label for="r-conf">Minimum confidence</label><input id="r-conf" type="number" value="30" min="0" max="100"></div>
+        </div>
+        <div class="row">
+          <div class="field"><label for="r-case">Case ID</label><input id="r-case"></div>
+          <div class="field"><label for="r-op">Operator</label><input id="r-op"></div>
+        </div>
+      </div>
+      <div>
+        <label><input type="checkbox" id="r-meta" checked> Parse filesystems for deleted entries (NTFS $MFT, FAT/exFAT, ext)</label>
+        <label><input type="checkbox" id="r-carve" checked> Signature and structure carving</label>
+        <label><input type="checkbox" id="r-frag" checked> Bi-fragment gap carving for split files</label>
+        <label><input type="checkbox" id="r-unalloc"> Restrict to unallocated clusters only</label>
+        <label><input type="checkbox" id="r-write" checked> Extract files (unticked = catalogue only)</label>
+        <div class="note" style="margin-top:12px">The source is opened read-only for the whole operation; FORGE never writes to evidence media. Each recovered object is hashed at extraction time.</div>
+        <div class="field" style="margin-top:14px"><button class="act" id="r-go">Start recovery scan</button></div>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <h2>Supported signatures</h2>
+    <div id="sigs" class="note"></div>
+  </div>
+</section>
+
+<!-- ==================== JOBS ==================== -->
+<section id="tab-jobs" class="hide">
+  <div class="panel">
+    <h2>Operations</h2>
+    <div id="joblist"><div class="empty">No operations started yet.</div></div>
+  </div>
+</section>
+
+<!-- ==================== AUDIT ==================== -->
+<section id="tab-audit" class="hide">
+  <div class="panel">
+    <h2>This session</h2>
+    <div class="kpi" id="auditkpi"></div>
+    <div class="note">Every operation appends a record to the audit log. Record <i>n</i> stores SHA-256(previous hash &#8214; record), so altering or removing any record breaks every hash after it. The log is sealed with HMAC-SHA256 when the session ends.</div>
+  </div>
+  <div class="panel">
+    <h2>Verify an audit log</h2>
+    <div class="row">
+      <div class="field"><label for="a-path">Log file path</label><input id="a-path" class="mono" placeholder="forge-audit.log"></div>
+      <div class="field"><label for="a-key">Session key (hex, optional &mdash; verifies the HMAC seal)</label><input id="a-key" class="mono"></div>
+      <div class="field" style="align-self:end"><button class="act" id="a-go">Verify chain</button></div>
+    </div>
+    <div id="a-result"></div>
+  </div>
+</section>
+</main>
+
+<script>
+const TOKEN = "__FORGE_TOKEN__";
+const $ = id => document.getElementById(id);
+const esc = s => String(s==null?"":s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const human = b => { b=Number(b)||0; const u=['B','KiB','MiB','GiB','TiB','PiB']; let i=0;
+  while(b>=1024 && i<5){b/=1024;i++;} return i? b.toFixed(2)+' '+u[i] : b+' B'; };
+
+async function api(path, opts={}) {
+  const r = await fetch(path, {...opts, headers:{'X-Forge-Token':TOKEN,
+    'Content-Type':'application/json', ...(opts.headers||{})}});
+  const text = await r.text();
+  let data; try { data = JSON.parse(text); } catch(e) { data = {raw:text}; }
+  if (!r.ok) throw new Error(data.error || r.status + ' ' + r.statusText);
+  return data;
+}
+const post = (p, body) => api(p, {method:'POST', body:JSON.stringify(body)});
+
+/* ---- tabs ---- */
+$('tabs').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  [...$('tabs').children].forEach(x => x.setAttribute('aria-selected', x===b));
+  ['drive','files','recover','jobs','audit'].forEach(t =>
+    $('tab-'+t).classList.toggle('hide', t !== b.dataset.tab));
+});
+
+/* ---- bootstrap ---- */
+let METHODS = [];
+async function boot() {
+  try {
+    const sys = await api('/api/system');
+    $('sysinfo').innerHTML = esc(sys.host) + ' &middot; ' + esc(sys.os) +
+      '<br>' + esc(sys.product) + ' ' + esc(sys.version) +
+      ' &middot; ' + (sys.elevated ? 'elevated' : 'not elevated');
+    $('privwarn').classList.toggle('hide', !!sys.elevated);
+    $('f-op').value = $('d-op').value = $('r-op').value = sys.user || '';
+    $('a-path').value = 'forge-audit.log';
+    renderAudit(sys);
+  } catch (e) { $('sysinfo').textContent = 'API error: ' + e.message; }
+
+  METHODS = await api('/api/methods');
+  for (const sel of ['d-method','f-method','w-method']) {
+    $(sel).innerHTML = METHODS.map(m =>
+      `<option value="${esc(m.id)}">${esc(m.name)} — ${m.passes} pass${m.passes>1?'es':''}</option>`).join('');
+  }
+  $('d-method').value = 'nist-clear';
+  $('f-method').value = 'dod3';
+  $('w-method').value = 'random';
+  $('d-method').onchange = () => {
+    const m = METHODS.find(x => x.id === $('d-method').value);
+    $('d-standard').textContent = m ? 'Conforms to: ' + m.standard +
+      (m.firmware_first ? ' — will attempt a firmware sanitize first.' : '') : '';
+  };
+  $('d-method').onchange();
+
+  const sigs = await api('/api/signatures');
+  const byCat = {};
+  sigs.forEach(s => (byCat[s.category] = byCat[s.category] || []).push(s));
+  $('sigs').innerHTML = Object.entries(byCat).map(([c, list]) =>
+    `<b>${esc(c)}</b> (${list.length}): ` + list.map(s =>
+      `<code title="${esc(s.description)}${s.structure_aware?' — structure-aware':''}">${esc(s.ext)}${s.structure_aware?'*':''}</code>`
+    ).join(' ')).join('<br>') +
+    '<br><br>Types marked <code>*</code> have a structural validator that resolves the exact file length rather than guessing from a footer.';
+
+  loadDevices();
+  pollJobs();
+}
+
+/* ---- devices ---- */
+let selectedDev = null;
+async function loadDevices() {
+  const tb = $('devtable').querySelector('tbody');
+  try {
+    const list = await api('/api/devices');
+    if (!list.length) { tb.innerHTML = '<tr><td colspan="7" class="empty">No devices visible. Elevated privileges are required to enumerate raw devices.</td></tr>'; return; }
+    tb.innerHTML = list.map(d => `
+      <tr data-id="${esc(d.id)}" data-serial="${esc(d.serial)}">
+        <td class="mono">${esc(d.id)}</td>
+        <td>${esc(d.model)}</td>
+        <td class="mono">${esc(d.serial) || '—'}</td>
+        <td>${esc(d.size_human)}</td>
+        <td>${esc(d.media)} / ${esc(d.bus)}${d.removable?' <span class="badge b-info">removable</span>':''}</td>
+        <td>${d.system_disk ? '<span class="badge b-bad">system disk</span>'
+                            : d.mounted ? '<span class="badge b-warn">'+esc(d.mountpoints)+'</span>'
+                                        : '<span class="badge b-ok">not mounted</span>'}</td>
+        <td>${d.ata_secure_erase?'<span class="badge b-info">ATA</span> ':''}${d.nvme_sanitize?'<span class="badge b-info">NVMe</span> ':''}${d.trim?'<span class="badge b-info">TRIM</span>':''}</td>
+      </tr>`).join('');
+    tb.querySelectorAll('tr').forEach(tr => tr.onclick = () => {
+      tb.querySelectorAll('tr').forEach(x => x.classList.remove('sel'));
+      tr.classList.add('sel');
+      selectedDev = tr.dataset.id;
+      $('d-device').value = tr.dataset.id;
+      $('r-src').value = $('r-src').value || tr.dataset.id;
+    });
+  } catch (e) {
+    tb.innerHTML = `<tr><td colspan="7" class="empty">${esc(e.message)}</td></tr>`;
+  }
+}
+
+/* ---- actions ---- */
+$('d-go').onclick = async () => {
+  const dev = $('d-device').value.trim();
+  if (!dev) return alert('Select or type a target device.');
+  if (!$('d-dry').checked &&
+      !confirm(`Permanently destroy all data on\n\n  ${dev}\n\nusing ${$('d-method').selectedOptions[0].text}?\n\nThis cannot be undone.`))
+    return;
+  try {
+    await post('/api/erase/drive', {
+      device: dev, method: $('d-method').value, verify: $('d-verify').value,
+      confirm: $('d-confirm').value || 'ERASE',
+      allow_system_disk: $('d-sys').checked, dry_run: $('d-dry').checked,
+      use_firmware: $('d-fw').checked, trim_after: $('d-trim').checked,
+      case_id: $('d-case').value, operator: $('d-op').value });
+    gotoJobs();
+  } catch (e) { alert(e.message); }
+};
+
+$('f-go').onclick = async () => {
+  const paths = $('f-paths').value.split('\n').map(s => s.trim()).filter(Boolean);
+  if (!paths.length) return alert('Enter at least one path.');
+  if (!$('f-dry').checked && !confirm(`Securely erase ${paths.length} path(s)? This cannot be undone.`)) return;
+  try {
+    await post('/api/erase/files', {
+      paths, method: $('f-method').value, verify: $('f-verify').value,
+      recursive: $('f-rec').checked, remove_metadata: $('f-meta').checked,
+      wipe_slack: $('f-slack').checked, remove_empty_dirs: $('f-rmdir').checked,
+      dry_run: $('f-dry').checked,
+      include: $('f-include').value || null, exclude: $('f-exclude').value || null,
+      case_id: $('f-case').value, operator: $('f-op').value });
+    gotoJobs();
+  } catch (e) { alert(e.message); }
+};
+
+$('w-go').onclick = async () => {
+  const vol = $('w-vol').value.trim();
+  if (!vol) return alert('Enter a volume.');
+  try { await post('/api/erase/freespace', {volume: vol, method: $('w-method').value}); gotoJobs(); }
+  catch (e) { alert(e.message); }
+};
+
+$('r-go').onclick = async () => {
+  const src = $('r-src').value.trim();
+  if (!src) return alert('Enter an evidence source.');
+  try {
+    await post('/api/recover', {
+      source: src, out_dir: $('r-out').value || null, types: $('r-types').value || null,
+      min_confidence: Number($('r-conf').value) || 0,
+      metadata: $('r-meta').checked, carve: $('r-carve').checked,
+      fragment: $('r-frag').checked, unallocated_only: $('r-unalloc').checked,
+      write_files: $('r-write').checked,
+      case_id: $('r-case').value, operator: $('r-op').value });
+    gotoJobs();
+  } catch (e) { alert(e.message); }
+};
+
+function gotoJobs() {
+  [...$('tabs').children].forEach(x => x.setAttribute('aria-selected', x.dataset.tab === 'jobs'));
+  ['drive','files','recover','jobs','audit'].forEach(t =>
+    $('tab-'+t).classList.toggle('hide', t !== 'jobs'));
+  pollJobs();
+}
+
+/* ---- job polling ---- */
+function jobCard(j) {
+  const pct = Math.min(100, Math.max(0, j.percent || 0));
+  const badge = j.state === 'done' ? 'b-ok' : j.state === 'failed' ? 'b-bad'
+              : j.state === 'running' ? 'b-warn' : 'b-info';
+  let body = '';
+  const R = j.result;
+  if (R && j.kind === 'drive-erase') {
+    body = `<div class="kpi">
+      <div><b>${esc(R.method)}</b><span>method</span></div>
+      <div><b>${human(R.bytes_written)}</b><span>written</span></div>
+      <div><b>${R.verified ? 'PASS' : 'FAIL'}</b><span>verification</span></div>
+      <div><b>${(R.verify_coverage||0).toFixed(3)}%</b><span>coverage</span></div>
+      <div><b>${(R.throughput_mib_s||0).toFixed(0)} MiB/s</b><span>throughput</span></div>
+      <div><b>${R.firmware_used ? 'yes' : 'no'}</b><span>firmware</span></div></div>`;
+  } else if (R && j.kind === 'file-erase') {
+    body = `<div class="kpi">
+      <div><b>${R.files_erased}</b><span>files erased</span></div>
+      <div><b>${R.files_failed}</b><span>failed</span></div>
+      <div><b>${human(R.bytes_erased)}</b><span>data destroyed</span></div>
+      <div><b>${human(R.slack_bytes)}</b><span>slack wiped</span></div>
+      <div><b>${R.streams_removed}</b><span>alt streams</span></div></div>`;
+  } else if (R && j.kind === 'freespace') {
+    body = `<div class="kpi">
+      <div><b>${human(R.bytes_written)}</b><span>overwritten</span></div>
+      <div><b>${R.mft_records_wiped}</b><span>dir records</span></div>
+      <div><b>${(R.free_before_gb||0).toFixed(1)} GB</b><span>free before</span></div>
+      <div><b>${(R.free_after_gb||0).toFixed(1)} GB</b><span>free after</span></div></div>`;
+  } else if (R && j.kind === 'recover') {
+    const cats = Object.entries(R.by_category || {})
+      .map(([k,v]) => `<span class="badge b-info">${esc(k)}: ${v}</span>`).join(' ');
+    body = `<div class="kpi">
+      <div><b>${R.files_recovered}</b><span>recovered</span></div>
+      <div><b>${human(R.bytes_recovered)}</b><span>data</span></div>
+      <div><b>${R.metadata_recovered}</b><span>from metadata</span></div>
+      <div><b>${R.fragmented}</b><span>defragmented</span></div>
+      <div><b>${R.headers_seen}</b><span>headers seen</span></div>
+      <div><b>${R.rejected}</b><span>rejected</span></div></div>
+      <div class="note">${esc(R.filesystem)} &nbsp; ${cats}</div>` +
+      (R.files && R.files.length ? `<table style="margin-top:10px"><thead><tr>
+        <th>#</th><th>Name</th><th>Type</th><th>Size</th><th>Offset</th>
+        <th>Method</th><th>Conf.</th><th>SHA-256</th></tr></thead><tbody>` +
+        R.files.slice(0,200).map(f => `<tr style="cursor:default">
+          <td>${f.index}</td><td>${esc(f.name)}</td><td>${esc(f.type)}</td>
+          <td>${human(f.size)}</td><td class="mono">0x${Number(f.offset).toString(16)}</td>
+          <td>${esc(f.method)}</td>
+          <td><span class="badge ${f.confidence>=75?'b-ok':f.confidence>=45?'b-warn':'b-bad'}"
+               title="${esc(f.why)}">${f.confidence}%</span></td>
+          <td class="mono" style="font-size:11px">${esc(String(f.sha256).slice(0,16))}…</td>
+        </tr>`).join('') + '</tbody></table>' : '');
+  }
+  const reports = (j.state === 'done' || j.state === 'failed') && j.kind !== 'freespace'
+    ? `<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+        <a class="ghost" style="text-decoration:none;display:inline-block"
+           href="/api/jobs/${j.id}/report?format=html&token=${TOKEN}" target="_blank">Open report</a>
+        <a class="ghost" style="text-decoration:none;display:inline-block"
+           href="/api/jobs/${j.id}/report?format=json&token=${TOKEN}" target="_blank">JSON</a>
+        <a class="ghost" style="text-decoration:none;display:inline-block"
+           href="/api/jobs/${j.id}/report?format=csv&token=${TOKEN}" target="_blank">CSV</a>
+       </div>` : '';
+  const cancel = j.state === 'running'
+    ? `<button class="ghost" onclick="cancelJob('${j.id}')">Cancel</button>` : '';
+  return `<div class="panel">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <h3 style="margin:0">${esc(j.title)}</h3>
+      <span class="badge ${badge}">${esc(j.state)}</span>
+      <span class="note" style="margin:0">${esc(j.phase)} ${esc(j.detail||'')}</span>
+      <span style="margin-left:auto" class="note">${(j.elapsed_seconds||0).toFixed(1)}s</span>
+      ${cancel}
+    </div>
+    ${j.state==='running' ? `<div class="bar" style="margin:10px 0"><i style="width:${pct}%"></i></div>
+       <div class="note">${pct.toFixed(1)}% — ${human(j.done)} of ${human(j.total)}</div>` : ''}
+    ${j.message ? `<div class="note">${esc(j.message)}</div>` : ''}
+    ${body}${reports}</div>`;
+}
+
+async function cancelJob(id) { try { await post(`/api/jobs/${id}/cancel`, {}); } catch(e){} }
+
+async function pollJobs() {
+  try {
+    const jobs = await api('/api/jobs');
+    $('joblist').innerHTML = jobs.length
+      ? jobs.slice().reverse().map(jobCard).join('')
+      : '<div class="empty">No operations started yet.</div>';
+    if (jobs.some(j => j.state === 'running')) {
+      const sys = await api('/api/system'); renderAudit(sys);
+    }
+  } catch (e) {}
+}
+setInterval(pollJobs, 1200);
+
+/* ---- audit ---- */
+function renderAudit(sys) {
+  $('auditkpi').innerHTML = `
+    <div><b>${esc(String(sys.audit_session||'—').slice(0,12))}…</b><span>session id</span></div>
+    <div><b>${sys.audit_records||0}</b><span>records</span></div>
+    <div><b class="mono" style="font-size:12px">${esc(String(sys.audit_head||'—').slice(0,24))}…</b><span>chain head (SHA-256)</span></div>`;
+}
+
+$('a-go').onclick = async () => {
+  try {
+    const v = await post('/api/audit/verify', {path: $('a-path').value, key: $('a-key').value});
+    $('a-result').innerHTML = `<div class="alert ${v.chain_ok && (!v.seal_checked || v.seal_ok) ? '' : 'bad'}"
+      style="margin-top:14px">
+      <b>${v.chain_ok ? 'Chain intact' : 'TAMPERING DETECTED'}</b> — ${esc(v.message)}<br>
+      records: ${v.records} &middot; head: <code>${esc(v.head_hash)}</code>
+      ${v.seal_checked ? '<br>HMAC seal: ' + (v.seal_ok ? 'verified' : 'INVALID') : ''}
+      ${v.first_bad_record ? '<br>first bad record: ' + v.first_bad_record : ''}
+      ${v.operator ? '<br>operator: ' + esc(v.operator) : ''}
+      ${v.case ? ' &middot; case: ' + esc(v.case) : ''}</div>`;
+  } catch (e) { $('a-result').innerHTML = `<div class="alert bad" style="margin-top:14px">${esc(e.message)}</div>`; }
+};
+
+boot();
+</script>
+</body>
+</html>

@@ -1,0 +1,215 @@
+Start testing: Sep 27 16:13 IST
+----------------------------------------------------------
+1/6 Testing: selftest
+1/6 Test: selftest
+Command: "/home/og/projects/SIH149/build/forge" "selftest"
+Directory: /home/og/projects/SIH149/build
+"selftest" start time: Sep 27 16:13 IST
+Output:
+----------------------------------------------------------
+
+FORGE self test
+
+  [ ok ] SHA-256 ("abc")
+  [ ok ] SHA-256 (empty)
+  [ ok ] HMAC-SHA256 (RFC 4231 #2)
+  [ ok ] MD5 ("abc")
+  [ ok ] CRC-32 (check value)
+  [ ok ] CSPRNG produces distinct blocks
+  [ ok ] CSPRNG entropy > 7.5 bits/byte
+  [ ok ] DoD pass 1 writes 0x00
+  [ ok ] DoD pass 2 writes the complement
+  [ ok ] Gutmann has 35 passes
+  [ ok ] method name parsing
+  [ ok ] PNG validator finds the exact length
+  [ ok ] PNG chunk CRCs verify
+  [ ok ] JPEG validator walks segments to EOI
+  [ ok ] BMP validator reads bfSize
+  [ ok ] Aho-Corasick finds all four planted signatures
+  [ ok ] audit chain verifies and the seal matches
+  [ ok ] a single altered byte breaks the chain
+  [ ok ] aligned allocator returns block-aligned memory
+  [ ok ] drive eraser completes on an image file
+  [ ok ] all three passes were written
+  [ ok ] no spurious unwritable sectors
+  [ ok ] full read-back verification passes at 100% coverage
+  [ ok ] no plaintext survives the overwrite
+  [ ok ] file eraser erased the target
+  [ ok ] overwrite verified before unlink
+  [ ok ] target no longer exists
+
+  all checks passed (0 failures)
+
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"selftest" end time: Sep 27 16:13 IST
+"selftest" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/6 Testing: build_image
+2/6 Test: build_image
+Command: "/home/og/projects/SIH149/build/forge_mkimage" "/home/og/projects/SIH149/build/case.img" "64"
+Directory: /home/og/projects/SIH149/build
+"build_image" start time: Sep 27 16:13 IST
+Output:
+----------------------------------------------------------
+Wrote /home/og/projects/SIH149/build/case.img (64 MiB)
+  MBR + FAT32 volume at LBA 2048, 16092 clusters of 4096 bytes
+
+  NAME           STATE              SIZE  SHA-256
+  live.pdf       live                434  413d160a9d46361b8ffa5902efc4e90e9970379f1f50dadb81b269a10bb2fdeb
+  live.png       live                106  788f99ee782957a28fde206d0a1621b1515ef48466a45a5c45c0e113e669be7c
+  secret.pdf     deleted             438  daa62a95531c54473ad982375b8df3d54fd24c13d49d5c9f92a0b2f4b7623aba
+  evidence.png   deleted             117  c6ccf20dbe13421da61f62d80343888314e4f4fa1bba1cf3a98a4ccfce8a6555
+  badge.gif      deleted              35  34e64f2b02b72cbf6873a21ef26b826b21024faa437564d14fd6558f94e7be0f
+  ledger.zip     deleted             164  f1d0fa0dac6d91209cb272feb607e8013ff3fca83c7a67d6f5285b54b4a5912e
+  photo.jpg      deleted            9032  56fc7c3226dc9495819e28851ac4abaa8e4c88303381dff38482d59ea61a5217
+  chat.db        deleted            8192  49013775dd91b66fef58238d92a2aac641baa886e4b09df20df1bed487e85164
+  memo.pdf       deleted              81  bfd82c7adf221fbc38679e897dc819039b219d0226723889e8f4f592246c51fa
+  orphan.pdf     orphan              433  411eef649efe2d04a7e7106113a1a2e88a6f4f27c463acab709a702af2f22ee5
+  orphan.png     orphan              125  9ccd5fac329d99589361560f84b076e97ae5877366852ecabe73c662faac19fd
+  orphan.zip     orphan              141  9c9dcfa5369ca599087b920476b1cdebf1b7cd4ac89a95c001b0f3b9a51497ae
+  orphan.gif     orphan               35  f46d7b55c5e1abd6763bda6d9c808727ea4e46c7d9e3180ac2363428559849d4
+  split.jpg      fragmented        12032  c0b908b75a3c7565b02965607689f8de68ae7ecfa84d3080c66cc65114e9f458
+
+  14 artefacts planted. Files marked 'live' must not appear in a
+  recovery report; every other row should.
+
+  Manifest: /home/og/projects/SIH149/build/case.img.manifest.csv
+
+<end of output>
+Test time =   0.08 sec
+----------------------------------------------------------
+Test Passed.
+"build_image" end time: Sep 27 16:13 IST
+"build_image" time elapsed: 00:00:00
+----------------------------------------------------------
+
+3/6 Testing: clean_audit
+3/6 Test: clean_audit
+Command: "/usr/bin/cmake" "-E" "rm" "-f" "/home/og/projects/SIH149/build/test-audit.log"
+Directory: /home/og/projects/SIH149/build
+"clean_audit" start time: Sep 27 16:13 IST
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"clean_audit" end time: Sep 27 16:13 IST
+"clean_audit" time elapsed: 00:00:00
+----------------------------------------------------------
+
+4/6 Testing: recover_image
+4/6 Test: recover_image
+Command: "/home/og/projects/SIH149/build/forge" "recover" "--source" "/home/og/projects/SIH149/build/case.img" "--out" "/home/og/projects/SIH149/build/recovered" "--report" "/home/og/projects/SIH149/build/recovery.json" "--audit-log" "/home/og/projects/SIH149/build/test-audit.log" "--quiet"
+Directory: /home/og/projects/SIH149/build
+"recover_image" start time: Sep 27 16:13 IST
+Output:
+----------------------------------------------------------
+
+FORENSIC RECOVERY REPORT
+========================
+Report ID   : 030898e23ac2aa9538baf1de09733e71
+Source      : /home/og/projects/SIH149/build/case.img (67108864 bytes, MBR partition table, 1 volume(s))
+Scanned     : 67108864 bytes in 0.32 s (200.6 MiB/s)
+Headers     : 25 candidate signatures
+Recovered   : 14 files, 30.63 KiB
+  metadata  : 7
+  fragmented: 1
+  rejected  : 0 below confidence floor
+
+[100%] _ECRET.PDF                             438 B     filesystem metadata      @0x127000  daa62a95531c54473ad982375b8df3d54fd24c13d49d5c9f92a0b2f4b7623aba
+[100%] _VIDENCE.PNG                           117 B     filesystem metadata      @0x128000  c6ccf20dbe13421da61f62d80343888314e4f4fa1bba1cf3a98a4ccfce8a6555
+[100%] _ADGE.GIF                              35 B      filesystem metadata      @0x129000  34e64f2b02b72cbf6873a21ef26b826b21024faa437564d14fd6558f94e7be0f
+[ 88%] _EDGER.ZIP                             164 B     filesystem metadata      @0x12a000  f1d0fa0dac6d91209cb272feb607e8013ff3fca83c7a67d6f5285b54b4a5912e
+[100%] _HOTO.JPG                              8.82 KiB  filesystem metadata      @0x12b000  56fc7c3226dc9495819e28851ac4abaa8e4c88303381dff38482d59ea61a5217
+[100%] _HAT.DB                                8.00 KiB  filesystem metadata      @0x12e000  49013775dd91b66fef58238d92a2aac641baa886e4b09df20df1bed487e85164
+[ 93%] _EMO.PDF                               81 B      filesystem metadata      @0x130000  bfd82c7adf221fbc38679e897dc819039b219d0226723889e8f4f592246c51fa
+[ 92%] 00000008_000000125000.pdf              434 B     structure-based carving  @0x125000  413d160a9d46361b8ffa5902efc4e90e9970379f1f50dadb81b269a10bb2fdeb
+[ 92%] 00000009_000000126000.png              106 B     structure-based carving  @0x126000  788f99ee782957a28fde206d0a1621b1515ef48466a45a5c45c0e113e669be7c
+[100%] 00000010_000000133000.pdf              433 B     structure-based carving  @0x133000  411eef649efe2d04a7e7106113a1a2e88a6f4f27c463acab709a702af2f22ee5
+[100%] 00000011_000000136000.png              125 B     structure-based carving  @0x136000  9ccd5fac329d99589361560f84b076e97ae5877366852ecabe73c662faac19fd
+[ 78%] 00000012_000000139000.zip              141 B     structure-based carving  @0x139000  9c9dcfa5369ca599087b920476b1cdebf1b7cd4ac89a95c001b0f3b9a51497ae
+[100%] 00000013_00000013c000.gif              35 B      structure-based carving  @0x13c000  f46d7b55c5e1abd6763bda6d9c808727ea4e46c7d9e3180ac2363428559849d4
+[ 78%] 00000014_00000013f000.jpg              11.75 KiB fragment reassembly      @0x13f000  c0b908b75a3c7565b02965607689f8de68ae7ecfa84d3080c66cc65114e9f458
+
+Report written to /home/og/projects/SIH149/build/recovery.json
+<end of output>
+Test time =   0.32 sec
+----------------------------------------------------------
+Test Passed.
+"recover_image" end time: Sep 27 16:13 IST
+"recover_image" time elapsed: 00:00:00
+----------------------------------------------------------
+
+5/6 Testing: score_recovery
+5/6 Test: score_recovery
+Command: "/home/og/projects/SIH149/build/forge_score" "/home/og/projects/SIH149/build/case.img.manifest.csv" "/home/og/projects/SIH149/build/recovery.json"
+Directory: /home/og/projects/SIH149/build
+"score_recovery" start time: Sep 27 16:13 IST
+Output:
+----------------------------------------------------------
+
+RECOVERY SCORECARD
+manifest : /home/og/projects/SIH149/build/case.img.manifest.csv
+report   : /home/og/projects/SIH149/build/recovery.json
+
+  ARTEFACT       PLANTED AS       SIZE  RESULT   RECOVERY METHOD          RECOVERED AS
+  --------------------------------------------------------------------------------------------------------
+  live.pdf       live              434  (live)   structure-based carving  00000008_000000125000.pdf
+  live.png       live              106  (live)   structure-based carving  00000009_000000126000.png
+  secret.pdf     deleted           438  PASS     filesystem metadata      _ECRET.PDF
+  evidence.png   deleted           117  PASS     filesystem metadata      _VIDENCE.PNG
+  badge.gif      deleted            35  PASS     filesystem metadata      _ADGE.GIF
+  ledger.zip     deleted           164  PASS     filesystem metadata      _EDGER.ZIP
+  photo.jpg      deleted          9032  PASS     filesystem metadata      _HOTO.JPG
+  chat.db        deleted          8192  PASS     filesystem metadata      _HAT.DB
+  memo.pdf       deleted            81  PASS     filesystem metadata      _EMO.PDF
+  orphan.pdf     orphan            433  PASS     structure-based carving  00000010_000000133000.pdf
+  orphan.png     orphan            125  PASS     structure-based carving  00000011_000000136000.png
+  orphan.zip     orphan            141  PASS     structure-based carving  00000012_000000139000.zip
+  orphan.gif     orphan             35  PASS     structure-based carving  00000013_00000013c000.gif
+  split.jpg      fragmented      12032  PASS     fragment reassembly      00000014_00000013f000.jpg
+
+  Target artefacts       : 12
+  Recovered byte-exact   : 12
+  Recovery rate          : 100.0%
+  Live files also carved : 2 (expected: content carving cannot
+                           tell allocated from unallocated data
+                           unless --unallocated-only is used)
+
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"score_recovery" end time: Sep 27 16:13 IST
+"score_recovery" time elapsed: 00:00:00
+----------------------------------------------------------
+
+6/6 Testing: verify_audit
+6/6 Test: verify_audit
+Command: "/home/og/projects/SIH149/build/forge" "audit" "verify" "--log" "/home/og/projects/SIH149/build/test-audit.log"
+Directory: /home/og/projects/SIH149/build
+"verify_audit" start time: Sep 27 16:13 IST
+Output:
+----------------------------------------------------------
+
+Audit log : /home/og/projects/SIH149/build/test-audit.log
+  records   : 4 in 1 session(s)
+  chain     : INTACT
+  session   : db5c4da0dc22545058795449bd2a5f96
+  head      : 0191f6bf8f80aeafe9b420626a82c80e1cf7bb123918469964a18dbbb7934f13
+  verdict   : hash chain intact across 4 record(s) in 1 session(s); seals present but no key supplied
+
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"verify_audit" end time: Sep 27 16:13 IST
+"verify_audit" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Sep 27 16:13 IST

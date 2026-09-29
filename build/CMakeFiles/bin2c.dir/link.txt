@@ -1,0 +1,1 @@
+/usr/bin/cc -O2 -Wl,--dependency-file=CMakeFiles/bin2c.dir/link.d CMakeFiles/bin2c.dir/tools/bin2c.c.o -o bin2c
